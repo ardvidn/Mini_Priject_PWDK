@@ -40,7 +40,7 @@ export const signinUser = async (req: Request, res: Response) => {
     });
 
     //bikin cookienya
-    res.cookie('user-cookie', token, {
+    res.cookie('user_cookie', token, {
       // pas production secure:true
       secure: false,
       httpOnly: true,
@@ -169,7 +169,7 @@ export const signupUser = async (req: Request, res: Response) => {
 
 export const signoutUser = (req: Request, res: Response) => {
   try {
-    res.clearCookie('user-cookie');
+    res.clearCookie('user_cookie');
     return res.status(200).json({
       code: 200,
       message: 'Successfuly sign out',
