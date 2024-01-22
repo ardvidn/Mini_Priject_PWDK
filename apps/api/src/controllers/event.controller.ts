@@ -95,6 +95,112 @@ export const eventCreate = async (req: Request, res: Response) => {
   }
 };
 
+// // untuk update event
+// export const eventUpdate = async (req: any, res: Response) => {
+//   try {
+//     const { id } = req;
+//     const { eventId } = req.params;
+//     const { title, description, event_date, location, avaiable_seat, image } =
+//       req.body;
+
+//     const eventUpdate = {
+//       title,
+//       description,
+//       event_date,
+//       location,
+//       avaiable_seat,
+//       image,
+//     };
+
+//     const parsedId = parseInt(id);
+//     if (!parsedId || isNaN(parsedId)) {
+//       return res.status(400).json({
+//         code: 400,
+//         message: 'Invalid ID params',
+//       });
+//     }
+
+//     const userArticle = await prismaClient.article.findFirst({
+//       where: {
+//         id: parsedId,
+//         userId,
+//       },
+//     });
+
+//     if (!userArticle) {
+//       return res.status(404).json({
+//         code: 404,
+//         message: `Article with id ${parsedId} not found`,
+//       });
+//     }
+
+//     const patchedArticle = await prismaClient.article.update({
+//       where: {
+//         id: parsedId,
+//       },
+//       data: patchArticlePayload,
+//     });
+
+//     return res.status(200).json({
+//       code: 200,
+//       message: 'Success',
+//       data: patchedArticle,
+//     });
+//   } catch (error: any) {
+//     console.log('@@@ getArticles error :', error.message || error);
+//     return res.status(500).json({
+//       code: 500,
+//       message: 'Internal Server Error',
+//     });
+//   }
+// };
+
+// export const deleteArticleById = async (req: any, res: Response) => {
+//   try {
+//     const { userId } = req;
+//     const { id } = req.params;
+
+//     const parsedId = parseInt(id);
+//     if (!parsedId || isNaN(parsedId)) {
+//       return res.status(400).json({
+//         code: 400,
+//         message: "Invalid ID params",
+//       });
+//     }
+
+//     const userArticle = await prismaClient.article.findFirst({
+//       where: {
+//         id: parsedId,
+//         userId,
+//       },
+//     });
+
+//     if (!userArticle) {
+//       return res.status(404).json({
+//         code: 404,
+//         message: `Article with id ${parsedId} not found`,
+//       });
+//     }
+
+//     await prismaClient.article.delete({
+//       where: {
+//         id: parsedId,
+//       },
+//     });
+
+//     return res.status(200).json({
+//       code: 200,
+//       message: "Success",
+//     });
+//   } catch (error: any) {
+//     console.log("@@@ getArticles error :", error.message || error);
+//     return res.status(500).json({
+//       code: 500,
+//       message: "Internal Server Error",
+//     });
+//   }
+// };
+
 // export const eventUpdate = async (req: Request, res: Response) => {
 //   try {
 //     const get_id = req.params.id;
