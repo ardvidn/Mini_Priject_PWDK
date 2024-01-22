@@ -61,11 +61,13 @@ export interface sigupPayload {
   password: string;
   username: string;
   referralCode?: string;
+  phone_num?: string;
 }
 
 export const signupUser = async (req: Request, res: Response) => {
   try {
-    const { email, password, username, referralCode }: sigupPayload = req.body;
+    const { email, password, username, referralCode, phone_num }: sigupPayload =
+      req.body;
 
     const userByEmail = await prisma.user.findUnique({
       where: { email },
@@ -102,6 +104,7 @@ export const signupUser = async (req: Request, res: Response) => {
           email,
           password: hashedPassword,
           referral: referralUser,
+          phone_num,
         },
       });
       return res.status(200).json({
@@ -134,6 +137,7 @@ export const signupUser = async (req: Request, res: Response) => {
             password: hashedPassword,
             referral: referralUser,
             referralBy: referralBy?.username,
+            phone_num,
           },
         });
 
