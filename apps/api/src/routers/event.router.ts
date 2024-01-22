@@ -6,7 +6,7 @@ const eventRouter = Router();
 
 eventRouter.get('/');
 eventRouter.post('/create', eventValidator, eventCreate);
-eventRouter.patch('/update/:id');
+eventRouter.patch('/update/:eventId');
 eventRouter.delete('/delete/:id');
 
 export default eventRouter;
