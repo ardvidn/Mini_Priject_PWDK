@@ -49,9 +49,9 @@ model Event {
   location       String
   available_seat Int
   image          String?
-  User           User?        @relation(fields: [userId], references: [id])
-  userId         Int?         @unique
+  userId         Int
   TicketTier     TicketTier[]
+  User           User         @relation(fields: [userId], references: [id])
 }
 
 model TicketTier {

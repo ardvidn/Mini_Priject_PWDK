@@ -32,7 +32,6 @@ export const eventCreate = async (req: Request, res: Response) => {
       available_seat,
       image,
       ticketTier,
-      userId,
     }: eventCreateListPayload = req.body;
 
     // decode cookies
@@ -99,29 +98,88 @@ export const eventCreate = async (req: Request, res: Response) => {
 
 export const eventUpdate = async (req: Request, res: Response) => {
   try {
-    const get_id = req.params.id;
+    const event_id = req.params.id;
+    const {
+      title,
+      description,
+      event_date,
+      location,
+      available_seat,
+      image,
+    }: eventCreateListPayload = req.body;
+    const { nameTier, price }: TicketTier = req.body;
 
-    // decode cookies
+    const patchEventPayload = {
+      title,
+      description,
+      event_date,
+      location,
+      available_seat,
+      image,
+    };
+
+    const patchTicketTierPayload = {
+      nameTier,
+      price,
+    };
+
+    //decode cookies
     const getCookies = req.cookies.user_cookie;
     const cookiesToDecode = jwtDecode<jwtPayload>(getCookies);
     const idWhoCreated = cookiesToDecode.id;
 
+    //get userId dari event
+    const userIdFromEvent = await prisma.event.findFirst({
+      where: {
+        userId: idWhoCreated,
+      },
+    });
+
     // check params.id = cookies id
-    if (get_id != idWhoCreated.toString()) {
+    if (userIdFromEvent?.userId != idWhoCreated) {
       return res.status(400).json({
         code: 400,
         message: 'you are not authorized to edit this event',
       });
     }
 
-    const getEventData = await prisma.event.findUnique({
-      where: { userId: idWhoCreated },
+    const getEventData = await prisma.event.findFirst({
+      where: {
+        userId: parseInt(event_id),
+      },
     });
+
+    if (!getEventData) {
+      return res.status(404).json({
+        code: 404,
+        message: `Article with id ${event_id} not found`,
+      });
+    }
+
+    const getTicketTierEventData = await prisma.ticketTier.findFirst({
+      where: {
+        eventId: parseInt(event_id),
+      },
+    });
+
+    const patchedEvent = await prisma.event.update({
+      where: {
+        id: parseInt(event_id),
+      },
+      data: patchEventPayload,
+    });
+
+    // const patchedTicketTier = await prisma.ticketTier.update({
+    //   where: {
+    //     id: parseInt(event_id),
+    //   },
+    //   data: patchTicketTierPayload,
+    // });
 
     return res.status(200).json({
       code: 200,
       message: 'successfully edit an event',
-      data: getEventData,
+      data: patchedEvent,
     });
   } catch (error) {
     console.log(error);
