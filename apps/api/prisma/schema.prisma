@@ -49,6 +49,8 @@ model Event {
   location       String
   available_seat Int
   image          String?
+  createdAt      DateTime     @default(now())
+  updateAt       DateTime     @updatedAt
   userId         Int
   TicketTier     TicketTier[]
   User           User         @relation(fields: [userId], references: [id])
