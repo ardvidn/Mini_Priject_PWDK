@@ -4,6 +4,9 @@ import { PrismaClient } from '@prisma/client';
 import { compare, hash } from '@/common/helper/bcrypt.helper';
 import { generateToken } from '@/common/helper/jwt.helper';
 import dayjs, { Dayjs } from 'dayjs';
+import { jwtDecode } from 'jwt-decode';
+import { calcPoint } from '@/common/helper/poin.calc.helper';
+import { calcVoucher } from '@/common/helper/voucher.calc.helper';
 
 export const signinUser = async (req: Request, res: Response) => {
   try {
@@ -146,6 +149,7 @@ export const signupUser = async (req: Request, res: Response) => {
         const createPoint = await prisma.poin.create({
           data: {
             userId: referralBy.id,
+            usedBy: username,
             expired_date: expiredDate,
           },
         });
@@ -177,6 +181,75 @@ export const signoutUser = (req: Request, res: Response) => {
     return res.status(200).json({
       code: 200,
       message: 'Successfuly sign out',
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export interface jwtPayload {
+  id: number;
+}
+
+export const getPoint = async (req: Request, res: Response) => {
+  try {
+    // decode cookies
+    const getCookies = req.cookies.user_cookie;
+    const cookiesToDecode = jwtDecode<jwtPayload>(getCookies);
+    const { id } = cookiesToDecode;
+
+    const getPointData = await prisma.poin.findMany({
+      where: {
+        userId: id,
+        expired_date: {
+          gt: new Date(),
+        },
+      },
+    });
+
+    const point = calcPoint(getPointData.length);
+
+    // console.log(point);
+
+    res.status(200).json({
+      code: 200,
+      total: point,
+    });
+  } catch (error) {
+    res.status(400).json({
+      code: 400,
+      message: 'error jg',
+    });
+  }
+};
+
+export const getVoucher = async (req: Request, res: Response) => {
+  try {
+    // decode cookies
+    const getCookies = req.cookies.user_cookie;
+    const cookiesToDecode = jwtDecode<jwtPayload>(getCookies);
+    const { id } = cookiesToDecode;
+
+    const getVoucherData = await prisma.voucher.findFirst({
+      where: {
+        userId: id,
+        expired_date: {
+          gt: new Date(),
+        },
+      },
+    });
+
+    if (!getVoucherData) {
+      return res.status(200).json({
+        code: 200,
+        message: 'voucher not found',
+      });
+    }
+
+    return res.status(200).json({
+      code: 200,
+      message: 'discount 10%',
+      voucher: '0.1',
     });
   } catch (error) {
     console.log(error);

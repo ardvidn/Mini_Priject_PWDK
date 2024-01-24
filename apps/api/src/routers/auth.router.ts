@@ -1,4 +1,6 @@
 import {
+  getPoint,
+  getVoucher,
   signinUser,
   signoutUser,
   signupUser,
@@ -11,5 +13,7 @@ const authRouter = Router();
 authRouter.post('/signin', signinUser);
 authRouter.post('/signup', signUpValidator, signupUser);
 authRouter.post('/signout', signoutUser);
+authRouter.get('/getpoint', getPoint);
+authRouter.get('/getvoucher', getVoucher);
 
 export default authRouter;
