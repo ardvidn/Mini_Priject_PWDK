@@ -52,6 +52,7 @@ model Event {
   createdAt      DateTime     @default(now())
   updateAt       DateTime     @updatedAt
   userId         Int
+  category_event String       @default("umum")
   TicketTier     TicketTier[]
   User           User         @relation(fields: [userId], references: [id])
 }
@@ -62,4 +63,9 @@ model TicketTier {
   price    Float
   Event    Event? @relation(fields: [eventId], references: [id])
   eventId  Int?
+}
+
+model CategoryEvent {
+  id             Int    @id @default(autoincrement())
+  category_event String
 }
