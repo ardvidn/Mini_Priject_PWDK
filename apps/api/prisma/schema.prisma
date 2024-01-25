@@ -31,6 +31,7 @@ model Poin {
   id           Int      @id @default(autoincrement())
   User         User?    @relation(fields: [userId], references: [id])
   userId       Int?
+  usedBy       String
   expired_date DateTime
 }
 
@@ -42,30 +43,41 @@ model Voucher {
 }
 
 model Event {
-  id             Int          @id @default(autoincrement())
+  id             Int               @id @default(autoincrement())
   title          String
   description    String
   event_date     DateTime
   location       String
   available_seat Int
   image          String?
-  createdAt      DateTime     @default(now())
-  updateAt       DateTime     @updatedAt
+  createdAt      DateTime          @default(now())
+  updateAt       DateTime          @updatedAt
   userId         Int
-  category_event String       @default("umum")
-  TicketTier     TicketTier[]
-  User           User         @relation(fields: [userId], references: [id])
-}
-
-model TicketTier {
-  id       Int    @id @default(autoincrement())
-  nameTier String
-  price    Float
-  Event    Event? @relation(fields: [eventId], references: [id])
-  eventId  Int?
+  category_event String            @default("umum")
+  price          Float?
+  User           User              @relation(fields: [userId], references: [id])
+  Review         Reviewandrating[]
 }
 
 model CategoryEvent {
   id             Int    @id @default(autoincrement())
   category_event String
+}
+
+model Reviewandrating {
+  id        Int    @id @default(autoincrement())
+  comment   String
+  rating    Int
+  Event     Event? @relation(fields: [eventId], references: [id])
+  eventId   Int?
+  commentBy String
+}
+
+model Transaction {
+  id             Int     @id @default(autoincrement())
+  transaction_id String
+  userWhoBought  String
+  eventBought    String
+  eventId        Int
+  status         String?
 }

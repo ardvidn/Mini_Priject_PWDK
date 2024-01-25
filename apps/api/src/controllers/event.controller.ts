@@ -16,7 +16,7 @@ export interface eventCreateListPayload {
   image: string;
   userId: number;
   category_event: string;
-  ticketTier: TicketTier[];
+  price: number;
 }
 
 export interface jwtPayload {
@@ -25,18 +25,17 @@ export interface jwtPayload {
 
 export const getEventAll = async (req: Request, res: Response) => {
   try {
-    const event = await prisma.event.findMany()
+    const event = await prisma.event.findMany();
 
     return res.status(200).json({
-      code:200,
-      message: "data succesfully collected",
-      data: event
-    })
+      code: 200,
+      message: 'data succesfully collected',
+      data: event,
+    });
   } catch (error) {
     console.log(error);
-    
   }
-}
+};
 
 export const getEventAllById = async (req: Request, res: Response) => {
   try {
@@ -44,20 +43,19 @@ export const getEventAllById = async (req: Request, res: Response) => {
 
     const event = await prisma.event.findMany({
       where: {
-        userId: parseInt(event_id)
-      }
-    })
+        userId: parseInt(event_id),
+      },
+    });
 
     return res.status(200).json({
-      code:200,
+      code: 200,
       message: `all event succesfully collected`,
-      data: event
-    })
+      data: event,
+    });
   } catch (error) {
     console.log(error);
-    
   }
-}
+};
 
 export const eventCreate = async (req: Request, res: Response) => {
   try {
@@ -69,7 +67,7 @@ export const eventCreate = async (req: Request, res: Response) => {
       available_seat,
       image,
       category_event,
-      ticketTier,
+      price,
     }: eventCreateListPayload = req.body;
 
     // decode cookies
@@ -96,7 +94,7 @@ export const eventCreate = async (req: Request, res: Response) => {
           data: { role: 'EO' },
         });
 
-        const getCategoryEvent = await prisma.categoryEvent.findMany()
+        const getCategoryEvent = await prisma.categoryEvent.findMany();
 
         const event = await prisma.event.create({
           data: {
@@ -107,23 +105,9 @@ export const eventCreate = async (req: Request, res: Response) => {
             available_seat,
             image,
             category_event,
+            price,
             userId: getUserFromDB.id,
           },
-        });
-
-        if (!ticketTier) return;
-
-        const ticketTierData = ticketTier.map(({ nameTier, price }) => {
-          const eventId = event.id;
-          return {
-            nameTier,
-            price,
-            eventId,
-          };
-        });
-
-        await prisma.ticketTier.createMany({
-          data: ticketTierData,
         });
       },
     );
@@ -148,7 +132,7 @@ export const eventUpdate = async (req: Request, res: Response) => {
       available_seat,
       image,
       category_event,
-      ticketTier,
+      price,
     }: eventCreateListPayload = req.body;
 
     const patchEventPayload = {
@@ -192,14 +176,7 @@ export const eventUpdate = async (req: Request, res: Response) => {
           image,
           category_event,
           available_seat,
-          TicketTier: {
-            deleteMany: {
-              eventId: parseInt(event_id),
-            },
-            createMany: {
-              data: ticketTier,
-            },
-          },
+          price,
         },
       });
     });
@@ -238,27 +215,18 @@ export const eventDelete = async (req: Request, res: Response) => {
       });
     }
 
-    await prisma.ticketTier.deleteMany({
-      where: {
-        eventId: parseInt(event_id)
-      }
-    })
-
     //delete event
     await prisma.event.delete({
       where: {
         id: parseInt(event_id),
       },
-      
     });
 
-
     return res.status(200).json({
-      code:200,
-      message: "event successfully deleted"
-    })
+      code: 200,
+      message: 'event successfully deleted',
+    });
   } catch (error) {
     console.log(error);
-    
   }
 };
