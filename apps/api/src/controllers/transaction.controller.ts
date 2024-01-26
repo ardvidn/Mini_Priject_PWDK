@@ -1,3 +1,5 @@
+import { calcPoint } from '@/common/helper/poin.calc.helper';
+import { calcVoucher } from '@/common/helper/voucher.calc.helper';
 import prisma from '@/prisma';
 import { Request, Response } from 'express';
 import { jwtDecode } from 'jwt-decode';
@@ -37,6 +39,8 @@ export const transactionEvent = async (req: Request, res: Response) => {
     },
   });
 
+  const poinNotExpired = calcPoint(getPoin.length)
+
   const getVoucher = await prisma.voucher.findFirst({
     where: {
       userId: id,
@@ -46,26 +50,35 @@ export const transactionEvent = async (req: Request, res: Response) => {
     },
   });
 
-  if (getEventToBuy?.price) {
-    // if gapake voucher dan poin
-    if (!getPoin && !getVoucher) {
-      const price = getEventToBuy?.price;
-      // langsung bayar
-    }
-    // if gapake voucher dan pake poin
-    if (!getVoucher && getPoin) {
-      // pilih mau pake poin apa kaga
-    }
-    // if pake voucher dan gapake poin
-    if (getVoucher && !getPoin) {
-      // pilih mau pake voucher apa akga
-    }
-    // if pake voucher dan poin
-  }
+  
+  if (getEventToBuy?.price)  {
+    
+      if (getVoucher) {
+        const total = getEventToBuy?.price - calcVoucher(getEventToBuy.price)
 
+        return res.status(200).json({
+          code: 200,
+          message: `total: ${total} `,
+          data: total,
+        });
+      }
+        // if gapake voucher dan pake poin
+      if (getPoin) {
+        const total = getEventToBuy?.price - calcPoint(getPoin.length)
+
+        return res.status(200).json({
+          code: 200,
+          message: `total: ${total} `,
+          data: total,
+        });
+      }
+  }
+  //   // if pake voucher dan gapake poin
+  //   // if pake voucher dan poin
+  
   return res.status(200).json({
     code: 200,
-    message: 'event data & ticket tier collected',
-    data: getEventToBuy,
+    message: 'price collected',
+    data: getEventToBuy?.price
   });
 };
