@@ -17,7 +17,10 @@ export const eventValidator = [
     .withMessage('please fill the availibility seat of your event'),
   body('category_event')
     .notEmpty()
-    .withMessage('please fill the availibility seat of your event'),
+    .withMessage('please fill the event category of your event'),
+  body('price')
+    .notEmpty()
+    .withMessage('please fill the price of your event'),
   body('image').notEmpty().withMessage('please fill the image of your event'),
 
   (req: Request, res: Response, next: NextFunction) => {

@@ -54,7 +54,7 @@ model Event {
   updateAt       DateTime          @updatedAt
   userId         Int
   category_event String            @default("umum")
-  price          Float?
+  price          Float
   User           User              @relation(fields: [userId], references: [id])
   Review         Reviewandrating[]
 }
