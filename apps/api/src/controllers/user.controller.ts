@@ -1,3 +1,4 @@
+import { calcPoint } from '@/common/helper/poin.calc.helper';
 import prisma from '@/prisma';
 import { Request, Response } from 'express';
 import { jwtDecode } from 'jwt-decode';
@@ -39,6 +40,50 @@ export const getUserDetail = async (req: Request, res: Response) => {
         userId: parseInt(id),
       },
     });
+
+    // start of updationg poin karena expired
+    if (getPoin) {
+      await prisma.poin.deleteMany({
+        where: {
+          userId: parseInt(id),
+          expired_date: {
+            lte: new Date(),
+          },
+        },
+      });
+
+      await prisma.user.update({
+        where: {
+          id: parseInt(id),
+        },
+        data: {
+          totalPoin: null,
+        },
+      });
+
+      await prisma.user.update({
+        where: {
+          id: parseInt(id),
+        },
+        data: {
+          totalPoin: calcPoint(getPoin.length),
+        },
+      });
+    }
+    // end of updationg poin karena expired
+
+    // start of updationg voucher karena expired
+    if (getVoucher) {
+      await prisma.voucher.deleteMany({
+        where: {
+          userId: parseInt(id),
+          expired_date: {
+            lte: new Date(),
+          },
+        },
+      });
+    }
+    // end of updationg voucher karena expired
 
     return res.status(200).json({
       code: 200,

@@ -3,6 +3,6 @@ import { Router } from 'express';
 
 const transactionRouter = Router();
 
-transactionRouter.get('/:id', transactionEvent);
+transactionRouter.post('/:id', transactionEvent);
 
 export default transactionRouter;

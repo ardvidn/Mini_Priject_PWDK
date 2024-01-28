@@ -12,6 +12,7 @@
   "dependencies": {
     "@types/react-icons": "^3.0.0",
     "@types/react-router-dom": "^5.3.3",
+    "axios": "^1.6.7",
     "next": "14.0.4",
     "react": "^18",
     "react-dom": "^18",

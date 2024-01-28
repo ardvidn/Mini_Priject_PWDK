@@ -153,9 +153,27 @@ export const signupUser = async (req: Request, res: Response) => {
           data: {
             userId: referralBy.id,
             usedBy: username,
+            poinNum: 10000,
             expired_date: expiredDate,
           },
         });
+
+        // start of upadting poin untuk yang punya referralcode
+        const getPoinData = await prisma.poin.findMany({
+          where: {
+            userId: referralBy.id,
+          },
+        });
+
+        const poinInUser = await prisma.user.update({
+          where: {
+            id: referralBy.id,
+          },
+          data: {
+            totalPoin: calcPoint(getPoinData.length),
+          },
+        });
+        // end of updating poin untuk yang punya referralcode
 
         // const getNewUserId = await prisma.user.findUnique({
         //   where: {
@@ -170,7 +188,7 @@ export const signupUser = async (req: Request, res: Response) => {
           },
         });
 
-        return { user };
+        return { user, poinInUser };
       });
 
       return res.status(200).json({
