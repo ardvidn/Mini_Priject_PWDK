@@ -33,7 +33,10 @@ export const getEventAll = async (req: Request, res: Response) => {
       data: event,
     });
   } catch (error) {
-    console.log(error);
+    return res.status(500).json({
+      code: 500,
+      message: 'internal server error',
+    });
   }
 };
 
@@ -53,7 +56,10 @@ export const getEventAllById = async (req: Request, res: Response) => {
       data: event,
     });
   } catch (error) {
-    console.log(error);
+    return res.status(500).json({
+      code: 500,
+      message: 'internal server error',
+    });
   }
 };
 
@@ -117,7 +123,10 @@ export const eventCreate = async (req: Request, res: Response) => {
       message: 'succesfully create an event',
     });
   } catch (error) {
-    console.log(error);
+    return res.status(500).json({
+      code: 500,
+      message: 'internal server error',
+    });
   }
 };
 
@@ -148,6 +157,19 @@ export const eventUpdate = async (req: Request, res: Response) => {
     const getCookies = req.cookies.user_cookie;
     const cookiesToDecode = jwtDecode<jwtPayload>(getCookies);
     const idWhoCreated = cookiesToDecode.id;
+
+    const checkUser = await prisma.user.findUnique({
+      where: {
+        id: idWhoCreated,
+      },
+    });
+
+    if (checkUser?.role != 'EO') {
+      return res.status(200).json({
+        code: 200,
+        message: 'you are not Event Organizer',
+      });
+    }
 
     //get userId dari event
     const userIdFromEvent = await prisma.event.findUnique({
@@ -187,7 +209,10 @@ export const eventUpdate = async (req: Request, res: Response) => {
       // data:
     });
   } catch (error) {
-    console.log(error);
+    return res.status(500).json({
+      code: 500,
+      message: 'internal server error',
+    });
   }
 };
 
@@ -199,6 +224,19 @@ export const eventDelete = async (req: Request, res: Response) => {
     const getCookies = req.cookies.user_cookie;
     const cookiesToDecode = jwtDecode<jwtPayload>(getCookies);
     const idWhoCreated = cookiesToDecode.id;
+
+    const checkUser = await prisma.user.findUnique({
+      where: {
+        id: idWhoCreated,
+      },
+    });
+
+    if (checkUser?.role != 'EO') {
+      return res.status(200).json({
+        code: 200,
+        message: 'you are not Event Organizer',
+      });
+    }
 
     //get userId dari event
     const userIdFromEvent = await prisma.event.findUnique({
@@ -227,6 +265,9 @@ export const eventDelete = async (req: Request, res: Response) => {
       message: 'event successfully deleted',
     });
   } catch (error) {
-    console.log(error);
+    return res.status(500).json({
+      code: 500,
+      message: 'internal server error',
+    });
   }
 };

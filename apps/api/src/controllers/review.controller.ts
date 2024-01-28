@@ -14,32 +14,39 @@ export interface jwtPayload {
 }
 
 export const reviewEvent = async (req: Request, res: Response) => {
-  const event_id = req.params.id;
+  try {
+    const event_id = req.params.id;
 
-  const getCookies = req.cookies.user_cookie;
-  const cookiesToDecode = jwtDecode<jwtPayload>(getCookies);
-  const idWhoCreated = cookiesToDecode.id;
+    const getCookies = req.cookies.user_cookie;
+    const cookiesToDecode = jwtDecode<jwtPayload>(getCookies);
+    const idWhoCreated = cookiesToDecode.id;
 
-  if (!getCookies) {
-    return res.status(400).json({
-      message: 'please sign in to comment this event',
+    if (!getCookies) {
+      return res.status(400).json({
+        message: 'please sign in to comment this event',
+      });
+    }
+
+    const { comment, rating }: reviewAndRatingPayload = req.body;
+
+    const getReviewAndRating = await prisma.reviewandrating.create({
+      data: {
+        comment,
+        rating,
+        eventId: parseInt(event_id),
+        commentBy: cookiesToDecode.username,
+      },
+    });
+
+    return res.status(200).json({
+      code: 200,
+      message: 'iyadah',
+      data: getReviewAndRating,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      code: 500,
+      message: 'internal server error',
     });
   }
-
-  const { comment, rating }: reviewAndRatingPayload = req.body;
-
-  const getReviewAndRating = await prisma.reviewandrating.create({
-    data: {
-      comment,
-      rating,
-      eventId: parseInt(event_id),
-      commentBy: cookiesToDecode.username,
-    },
-  });
-
-  return res.status(200).json({
-    code: 200,
-    message: 'iyadah',
-    data: getReviewAndRating,
-  });
 };

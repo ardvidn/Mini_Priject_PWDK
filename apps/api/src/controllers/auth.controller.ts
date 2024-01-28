@@ -55,7 +55,10 @@ export const signinUser = async (req: Request, res: Response) => {
       message: 'successfully sign in',
     });
   } catch (error: any) {
-    console.log(error);
+    return res.status(500).json({
+      code: 500,
+      message: 'internal server error',
+    });
   }
 };
 
@@ -154,6 +157,12 @@ export const signupUser = async (req: Request, res: Response) => {
           },
         });
 
+        // const getNewUserId = await prisma.user.findUnique({
+        //   where: {
+        //     username: username,
+        //   },
+        // });
+
         const createVoucher = await prisma.voucher.create({
           data: {
             userId: user.id,
@@ -171,7 +180,10 @@ export const signupUser = async (req: Request, res: Response) => {
       });
     }
   } catch (error: any) {
-    console.log(error);
+    return res.status(500).json({
+      code: 500,
+      message: 'internal server error',
+    });
   }
 };
 
@@ -183,7 +195,10 @@ export const signoutUser = (req: Request, res: Response) => {
       message: 'Successfuly sign out',
     });
   } catch (error) {
-    console.log(error);
+    return res.status(500).json({
+      code: 500,
+      message: 'internal server error',
+    });
   }
 };
 
@@ -216,9 +231,9 @@ export const getPoint = async (req: Request, res: Response) => {
       total: point,
     });
   } catch (error) {
-    res.status(400).json({
-      code: 400,
-      message: 'error jg',
+    return res.status(500).json({
+      code: 500,
+      message: 'internal server error',
     });
   }
 };
@@ -252,6 +267,9 @@ export const getVoucher = async (req: Request, res: Response) => {
       voucher: '0.1',
     });
   } catch (error) {
-    console.log(error);
+    return res.status(500).json({
+      code: 500,
+      message: 'internal server error',
+    });
   }
 };
