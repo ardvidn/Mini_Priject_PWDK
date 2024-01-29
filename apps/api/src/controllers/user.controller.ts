@@ -42,6 +42,7 @@ export const getUserDetail = async (req: Request, res: Response) => {
     });
 
     // start of updationg poin karena expired
+
     if (getPoin) {
       await prisma.poin.deleteMany({
         where: {
