@@ -1,3 +1,5 @@
+import createTransaction from '@/common/helper/create.transaction';
+import decreamentSeat from '@/common/helper/decreament.seat';
 import { calcPoint } from '@/common/helper/poin.calc.helper';
 import { calcVoucher } from '@/common/helper/voucher.calc.helper';
 import prisma from '@/prisma';
@@ -6,6 +8,7 @@ import { jwtDecode } from 'jwt-decode';
 
 export interface jwtPayload {
   id: number;
+  username: string;
 }
 
 export const transactionEvent = async (req: Request, res: Response) => {
@@ -17,6 +20,7 @@ export const transactionEvent = async (req: Request, res: Response) => {
     const getCookies = req.cookies.user_cookie;
     const cookiesToDecode = jwtDecode<jwtPayload>(getCookies);
     const { id } = cookiesToDecode;
+    const { username } = cookiesToDecode;
 
     if (!getCookies) {
       return res.status(400).json({
@@ -48,6 +52,14 @@ export const transactionEvent = async (req: Request, res: Response) => {
         },
       },
     });
+
+    // membatasi pembeli agar tidak beli lebih dari 5
+    if (total_ticket > 5) {
+      return res.status(200).json({
+        code: 200,
+        message: "please don't be greedy",
+      });
+    }
 
     if (getEventToBuy?.available_seat == 0) {
       return res.status(200).json({
@@ -93,8 +105,11 @@ export const transactionEvent = async (req: Request, res: Response) => {
           },
         });
 
-        if (userPoin?.totalPoin != null) {
+        if (userPoin?.totalPoin != null && userPoin.totalPoin != 0) {
           if (userPoin?.totalPoin >= getEventToBuy.price) {
+            createTransaction(username, getEventToBuy.title, getEventToBuy.id);
+            decreamentSeat(event_id, total_ticket);
+
             return res.status(200).json({
               code: 200,
               message:
@@ -117,6 +132,9 @@ export const transactionEvent = async (req: Request, res: Response) => {
               totalPoin: null,
             },
           });
+
+          createTransaction(username, getEventToBuy.title, getEventToBuy.id);
+          decreamentSeat(event_id, total_ticket);
           return res.status(200).json({
             code: 200,
             message: 'price collected, poin used',
@@ -133,25 +151,22 @@ export const transactionEvent = async (req: Request, res: Response) => {
             userId: id,
           },
         });
+        createTransaction(username, getEventToBuy.title, getEventToBuy.id);
+        decreamentSeat(event_id, total_ticket);
         return res.status(200).json({
           code: 200,
           message: 'price collected after use voucher',
           data: totalPrice,
         });
       }
-
+      createTransaction(username, getEventToBuy.title, getEventToBuy.id);
+      decreamentSeat(event_id, total_ticket);
       return res.status(200).json({
         code: 200,
         message: 'price collected',
         data: totalPrice,
       });
     }
-
-    // return res.status(200).json({
-    //   code: 200,
-    //   message: 'price collected',
-    //   data:,
-    // });
   } catch (error) {
     return res.status(500).json({
       code: 500,
