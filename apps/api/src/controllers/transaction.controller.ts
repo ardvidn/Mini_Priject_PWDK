@@ -55,66 +55,38 @@ export const transactionEvent = async (req: Request, res: Response) => {
         message: 'seats already sold out',
       });
     }
+    // update user poin karnera expired
+    await prisma.poin.deleteMany({
+      where: {
+        userId: id,
+        expired_date: {
+          lte: new Date(),
+        },
+      },
+    });
+
+    await prisma.user.update({
+      where: {
+        id: id,
+      },
+      data: {
+        totalPoin: null,
+      },
+    });
+
+    await prisma.user.update({
+      where: {
+        id: id,
+      },
+      data: {
+        totalPoin: calcPoint(getPoin.length),
+      },
+    });
 
     if (getEventToBuy?.price) {
       let totalPrice = total_ticket * getEventToBuy.price;
 
-      if (usePoin && useVoucher) {
-        const userPoin = await prisma.user.findUnique({
-          where: {
-            id: id,
-          },
-        });
-        if (userPoin?.totalPoin != null) {
-          totalPrice -= userPoin?.totalPoin;
-          totalPrice -= calcVoucher(totalPrice);
-          await prisma.voucher.deleteMany({
-            where: {
-              userId: id,
-            },
-          });
-
-          // await prisma.poin.deleteMany({
-          //   where: {
-          //     userId: id,
-          //   },
-          // });
-          return res.status(200).json({
-            code: 200,
-            message: 'price collected, poin and voucher used',
-            data: totalPrice,
-          });
-        }
-      }
-
-      if (usePoin) {
-        await prisma.poin.deleteMany({
-          where: {
-            userId: id,
-            expired_date: {
-              lte: new Date(),
-            },
-          },
-        });
-
-        await prisma.user.update({
-          where: {
-            id: id,
-          },
-          data: {
-            totalPoin: null,
-          },
-        });
-
-        await prisma.user.update({
-          where: {
-            id: id,
-          },
-          data: {
-            totalPoin: calcPoint(getPoin.length),
-          },
-        });
-
+      if (usePoin > 0) {
         const userPoin = await prisma.user.findUnique({
           where: {
             id: id,
@@ -125,16 +97,26 @@ export const transactionEvent = async (req: Request, res: Response) => {
           if (userPoin?.totalPoin >= getEventToBuy.price) {
             return res.status(200).json({
               code: 200,
-              message: 'price collected, poin not use cause a condition',
+              message:
+                'price collected, poin not use cause a price to high compare to your poin',
               data: totalPrice,
             });
           }
           totalPrice -= userPoin?.totalPoin;
-          // await prisma.poin.deleteMany({
-          //   where: {
-          //     userId: id,
-          //   },
-          // });
+          await prisma.poin.deleteMany({
+            where: {
+              userId: id,
+            },
+          });
+
+          await prisma.user.update({
+            where: {
+              id: id,
+            },
+            data: {
+              totalPoin: null,
+            },
+          });
           return res.status(200).json({
             code: 200,
             message: 'price collected, poin used',
