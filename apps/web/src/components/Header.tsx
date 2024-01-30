@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import Image from 'next/image';
 import Link from 'next/link';
+import SearchBar from './SearchBar';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,7 +14,6 @@ const Header = () => {
     setIsOpen(!isOpen);
   };
 
-
   return (
     <>
       <nav className="bg-sky-500 p-4">
@@ -21,6 +21,9 @@ const Header = () => {
           <Link href={'/'} className="text-white text-2xl font-bold">
             Logo
           </Link>
+          <div>
+            <SearchBar />
+          </div>
 
           <div className="lg:hidden">
             <button onClick={toggleNavbar} className="text-white">
