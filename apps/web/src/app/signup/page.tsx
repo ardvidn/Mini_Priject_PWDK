@@ -26,8 +26,8 @@ const Signup = () => {
         .then((res) => res.data)
         .catch((error) => console.log(error));
 
-      if (res.success === true) {
-        router.push('/');
+      if (res.code === 200) {
+        router.push('/login');
         router.refresh();
       }
     } catch (error) {
@@ -37,7 +37,7 @@ const Signup = () => {
   return (
     <div className="flex justify-center items-center h-screen">
       <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-96">
-        <form>
+        <form onSubmit={userSignup}>
           <h2 className="text-center text-xl font-bold mb-6">Sign Up</h2>
           <div className="mb-4">
             <label
@@ -131,6 +131,7 @@ const Signup = () => {
               name="phone_num"
               type="text"
               placeholder="Phone Number"
+              required
               value={signupData.phone_num}
               onChange={(e) =>
                 setSignupData({ ...signupData, phone_num: e.target.value })
