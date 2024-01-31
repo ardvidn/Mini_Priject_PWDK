@@ -45,20 +45,22 @@ model Voucher {
 }
 
 model Event {
-  id             Int               @id @default(autoincrement())
-  title          String
-  description    String
-  event_date     DateTime
-  location       String
-  available_seat Int
-  image          String?
-  createdAt      DateTime          @default(now())
-  updateAt       DateTime          @updatedAt
-  userId         Int
-  category_event String            @default("umum")
-  price          Float
-  User           User              @relation(fields: [userId], references: [id])
-  Review         Reviewandrating[]
+  id                Int               @id @default(autoincrement())
+  title             String
+  description       String
+  event_date        DateTime
+  location          String
+  available_seat    Int
+  image             String?
+  createdAt         DateTime          @default(now())
+  updateAt          DateTime          @updatedAt
+  userId            Int
+  category_event    String            @default("umum")
+  price             Float
+  User              User              @relation(fields: [userId], references: [id])
+  Review            Reviewandrating[]
+  eventVoucher      Float?
+  eventVoucherAvail Int?
 }
 
 model CategoryEvent {

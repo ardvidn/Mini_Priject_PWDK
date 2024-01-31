@@ -17,15 +17,28 @@ export interface eventCreateListPayload {
   userId: number;
   category_event: string;
   price: number;
+  eventVoucher: number;
+  eventVoucherAvail: number;
 }
 
 export interface jwtPayload {
   id: number;
 }
 
+export const getCategoryEvent = async (req: Request, res: Response) => {
+  const categoryEvent = await prisma.categoryEvent.findMany();
+
+  return res.status(200).json({
+    code: 200,
+    message: 'category collected',
+    data: categoryEvent,
+  });
+};
+
 export const getEventAll = async (req: Request, res: Response) => {
   try {
     const event = await prisma.event.findMany();
+    const filterredEvent = event.filter((e) => e.title);
 
     return res.status(200).json({
       code: 200,
@@ -74,6 +87,8 @@ export const eventCreate = async (req: Request, res: Response) => {
       image,
       category_event,
       price,
+      eventVoucher,
+      eventVoucherAvail,
     }: eventCreateListPayload = req.body;
 
     // decode cookies
@@ -100,8 +115,6 @@ export const eventCreate = async (req: Request, res: Response) => {
           data: { role: 'EO' },
         });
 
-        const getCategoryEvent = await prisma.categoryEvent.findMany();
-
         const event = await prisma.event.create({
           data: {
             title,
@@ -112,6 +125,8 @@ export const eventCreate = async (req: Request, res: Response) => {
             image,
             category_event,
             price,
+            eventVoucher: eventVoucher / 100,
+            eventVoucherAvail,
             userId: getUserFromDB.id,
           },
         });

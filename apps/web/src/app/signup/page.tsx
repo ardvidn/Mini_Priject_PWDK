@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import axios from 'axios';
 
-const apiSignup = 'http://localhost:8000/api/auth/signup';
+const apiSignup = 'http://localhost:9296/api/auth/signup';
 
 const Signup = () => {
   const [signupData, setSignupData] = useState({

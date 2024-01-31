@@ -1,5 +1,6 @@
 import createTransaction from '@/common/helper/create.transaction';
 import decreamentSeat from '@/common/helper/decreament.seat';
+import eventVoucehrAvailUpdate from '@/common/helper/eventVoucherAvail.update';
 import { calcPoint } from '@/common/helper/poin.calc.helper';
 import { calcVoucher } from '@/common/helper/voucher.calc.helper';
 import prisma from '@/prisma';
@@ -15,7 +16,7 @@ export const transactionEvent = async (req: Request, res: Response) => {
   try {
     const event_id = req.params.id;
 
-    const { total_ticket, usePoin, useVoucher } = req.body;
+    const { total_ticket, usePoin, useVoucher, useEventVoucher } = req.body;
 
     const getCookies = req.cookies.user_cookie;
     const cookiesToDecode = jwtDecode<jwtPayload>(getCookies);
@@ -117,21 +118,22 @@ export const transactionEvent = async (req: Request, res: Response) => {
               data: totalPrice,
             });
           }
-          totalPrice -= userPoin?.totalPoin;
-          await prisma.poin.deleteMany({
-            where: {
-              userId: id,
-            },
-          });
 
-          await prisma.user.update({
-            where: {
-              id: id,
-            },
-            data: {
-              totalPoin: null,
-            },
-          });
+          // totalPrice -= userPoin?.totalPoin;
+          // await prisma.poin.deleteMany({
+          //   where: {
+          //     userId: id,
+          //   },
+          // });
+
+          // await prisma.user.update({
+          //   where: {
+          //     id: id,
+          //   },
+          //   data: {
+          //     totalPoin: null,
+          //   },
+          // });
 
           createTransaction(username, getEventToBuy.title, getEventToBuy.id);
           decreamentSeat(event_id, total_ticket);
@@ -146,11 +148,11 @@ export const transactionEvent = async (req: Request, res: Response) => {
       if (useVoucher) {
         totalPrice -= calcVoucher(totalPrice);
 
-        await prisma.voucher.deleteMany({
-          where: {
-            userId: id,
-          },
-        });
+        // await prisma.voucher.deleteMany({
+        //   where: {
+        //     userId: id,
+        //   },
+        // });
         createTransaction(username, getEventToBuy.title, getEventToBuy.id);
         decreamentSeat(event_id, total_ticket);
         return res.status(200).json({
@@ -159,6 +161,39 @@ export const transactionEvent = async (req: Request, res: Response) => {
           data: totalPrice,
         });
       }
+
+      if (useEventVoucher) {
+        if (getEventToBuy.eventVoucherAvail === 0) {
+          return res.status(200).json({
+            code: 200,
+            message: 'event voucher not available',
+          });
+        }
+        if (getEventToBuy.eventVoucher) {
+          totalPrice -= totalPrice * getEventToBuy.eventVoucher;
+          // eventVoucehrAvailUpdate(id);
+
+          await prisma.event.update({
+            where: {
+              id: parseInt(event_id),
+            },
+            data: {
+              eventVoucherAvail: {
+                decrement: 1,
+              },
+            },
+          });
+
+          createTransaction(username, getEventToBuy.title, getEventToBuy.id);
+          decreamentSeat(event_id, total_ticket);
+          return res.status(200).json({
+            code: 200,
+            message: 'price collected. event voucher used',
+            data: totalPrice,
+          });
+        }
+      }
+
       createTransaction(username, getEventToBuy.title, getEventToBuy.id);
       decreamentSeat(event_id, total_ticket);
       return res.status(200).json({
